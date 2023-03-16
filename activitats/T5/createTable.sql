@@ -1,0 +1,1 @@
+CREATE TABLE backup_employees SELECT * FROM employees;

@@ -232,44 +232,135 @@ WHERE p.NAME = (
 -- 31. Title of all the books written by the same author as the book "EL MEDICO".
 select TITLE
 from BOOKS
-where (select AUTHOR_CODE from AUTHORS where AUTHOR_CODE = books.AUTHOR_CODE)
+where (select AUTHOR_CODE from AUTHORS where AUTHOR_CODE = BOOKS.AUTHOR_CODE)
 and TITLE = 'EL MEDICO';
 
 -- 32. Title of all the books that belong to any of the genres to which the book "EL MEDICO" belongs.
-
+SELECT B.TITLE
+FROM GENREBOOK G
+    JOIN BOOKS B ON G.BOOK_CODE = B.BOOK_CODE AND
+                    G.GENRE_CODE IN
+                        (SELECT GENRE_CODE
+                        FROM GENREBOOK G
+                        JOIN BOOKS B ON G.BOOK_CODE = B.BOOK_CODE
+                        WHERE TITLE = 'EL MEDICO'
+                        );
 
 -- 33. Returns how many books have been published by the same publisher as "EL MEDICO".
-
+SELECT COUNT(*)
+FROM BOOKS
+WHERE PUBLISHER_CODE = (SELECT PUBLISHER_CODE FROM BOOKS WHERE TITLE = 'EL MEDICO');
 
 -- 34. Returns the total number of loans made in 2011 and the total number of loans returned in the same year.
+SELECT  COUNT(*) as 'Borrows of 2011'
+FROM BORROWS
+WHERE YEAR(BORROW_DATE) = 2011 AND YEAR(RETURN_DATE) = 2011;
 
+SELECT  COUNT(*) as 'Borrows of 2011'
+FROM BORROWS
+WHERE YEAR(BORROW_DATE) = 2011;
+
+SELECT (SELECT  COUNT(*) as 'Borrows of 2011'
+    FROM BORROWS
+    WHERE YEAR(BORROW_DATE) = 2011) as '2011 Borrows',
+    (SELECT  COUNT(*) as 'Borrows of 2011'
+FROM BORROWS
+WHERE YEAR(BORROW_DATE) = 2011 AND YEAR(RETURN_DATE) = 2011) as 'Returned same Year';
 
 -- 35. Returns how many books each author wrote (answer format: name surname number, noha gordon 5, ...)
+SELECT A.NAME, COUNT(*)
+FROM AUTHORS A
+JOIN BOOKS B ON A.AUTHOR_CODE = B.AUTHOR_CODE
+GROUP BY A.NAME;
 
+SELECT CONCAT(A.NAME, ' ',SURNAMES, ' ', A.AUTHOR_CODE ) as author, COUNT(*)
+FROM BOOKS
+RIGHT JOIN AUTHORS A ON BOOKS.AUTHOR_CODE = A.AUTHOR_CODE
+GROUP BY author;
 
 -- 36. Return how many copies there are in total for each book (answer format: title total, PROGAMACION EN COBOL 3, ...)
-
+SELECT TITLE, COUNT(*)
+FROM BOOKS
+LEFT JOIN COPIES C ON BOOKS.BOOK_CODE = C.BOOK_CODE
+GROUP BY  TITLE;
 
 -- 37. Return the average number of copies per book.
+-- afegim left join per els llibres que no tenen copies, per això el count es de book_code i no de *
+select avg(ncopies) from (
+select count(c.BOOK_CODE) as 'ncopies'
+from BOOKS as b
+left join COPIES as c on c.BOOK_CODE = b.BOOK_CODE
+group by b.BOOK_CODE
+) as taula;
 
+SELECT AVG(
+	(SELECT COUNT(*) 
+    FROM COPIES 
+    WHERE COPIES.BOOK_CODE = OTHER.BOOK_CODE)
+    ) as AVGcopys
+FROM BOOKS OTHER;
 
 -- 38. Returns how many books there are in each genre (output format: genre total, HISTORIA 25, ...)
+select concat(gen.name, " - ", count(book_code)) as 'Books per genre'
+from BOOKS as b
+join GENREBOOK as gn using(book_code)
+join GENRES as gen on gen.genre_code = gn.genre_code
+group by gen.name;
 
+select g.name, count(gb.book_code)
+from GENREBOOK as gb
+join GENRES as g using (genre_code)
+group by g.name;
 
 -- 39. Return how many loans each member has made in total (output format: name surnames total, toni mesquida 7, ...)
-
+select concat(m.name, ", ",m.surnames, " - ", count(b.member_code)) as 'Loans'
+from BORROWS as b
+join  MEMBERS as m on (b.member_code = m.member_code)
+group by b.MEMBER_CODE;
 
 -- 40. Return, for each member, the number of books he has borrowed.
-
+select m.name,m.surnames, count(distinct BOOK_CODE)
+from BORROWS as b
+join COPIES as c on b.COPY_CODE = c.COPY_CODE
+join  MEMBERS as m on (b.member_code = m.member_code)
+group by b.MEMBER_CODE;
 
 -- 41. List of members that have made more than 5 loans.
-
+select m.name,m.surnames, count(distinct BOOK_CODE)
+from BORROWS as b
+join COPIES as c on b.COPY_CODE = c.COPY_CODE
+join  MEMBERS as m on (b.member_code = m.member_code)
+group by b.MEMBER_CODE
+having count(b.COPY_CODE) > 5;
 
 -- 42. List of members who currently have more than one book on loan.
-
+SELECT m.NAME, m.SURNAMES, COUNT(*) as total_loans
+FROM BORROWS as b
+JOIN MEMBERS as m ON b.MEMBER_CODE = m.MEMBER_CODE
+WHERE b.RETURN_DATE IS NULL
+GROUP BY m.MEMBER_CODE
+HAVING total_loans > 1;
 
 -- 43. For the book "El medico", return the total number of copies, number of copies currently on loan and number of available copies (output format: title number_of_copies on_loan available, the doctor 5 3 2)
+SELECT
+	(SELECT COUNT(*)
+	FROM BOOKS
+	JOIN COPIES as C ON BOOKS.BOOK_CODE = C.BOOK_CODE
+	WHERE TITLE = 'El medico') as 'TOTAL COPYS',
 
+	(SELECT COUNT(*)
+	FROM BOOKS
+	JOIN COPIES as C ON BOOKS.BOOK_CODE = C.BOOK_CODE
+	JOIN BORROWS as B ON C.COPY_CODE = B.COPY_CODE
+	WHERE TITLE = 'El medico' AND RETURN_DATE IS NULL) AS 'NOT AVIABLE',
+
+	(SELECT COUNT(*)
+	FROM BOOKS
+	JOIN COPIES as C ON BOOKS.BOOK_CODE = C.BOOK_CODE
+	JOIN BORROWS as B ON C.COPY_CODE = B.COPY_CODE
+	WHERE TITLE = 'El medico' AND C.COPY_CODE NOT IN (SELECT COPY_CODE
+	FROM BORROWS
+	WHERE RETURN_DATE IS NULL)) AS 'AVIABLE';
 
 -- 44. Retrieves the number of books in the library, the number of copies, and the average number of copies per book.
 
@@ -350,5 +441,30 @@ and TITLE = 'EL MEDICO';
 
 
 -- 70. Which is the most requested book for each year, that is, borrowed more times.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

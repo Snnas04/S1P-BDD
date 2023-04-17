@@ -4,7 +4,6 @@ use videoshop;
 set @max = (select MAX(length) from films);
 SELECT @max;
 
-
 -- 2. Show all data from both films using variables you created at previous exercise.
 
 

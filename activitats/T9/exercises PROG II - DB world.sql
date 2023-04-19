@@ -48,7 +48,29 @@ SELECT ... FROM .. WHERE CountryCode = 'ESP'$$
 SELECT ... FROM .. WHERE CountryCode = 'AGO'$$
 
 -- 2) Create a PROCEDURE with no arguments to get ALL countries and their languages. Use the same format as in the example below. HINT: use you previous function.
-
+create procedure idiomes ()
+begin
+	declare pais_idiomes varchar(300);
+    declare final boolean default flase;
+	declare resultat text default '';
+    
+	declare myCursor cursor for select concat(name, ' (', idiomes_pais(code), ')') from country;
+    declare continue handler for not found set final = true;
+    
+    open myCursor;
+    bucle: loop
+		fetch myCursor into pais_idiomes;
+        
+        if final then
+			leave bucle;
+		end if;
+        
+        set resultat = concat(resultat, pais_idiomes, '\n');
+	end loop;
+    
+    close myCursor;
+    select resultat;
+end $$
 
 
 CALL idiomes $$
@@ -64,7 +86,7 @@ Antarctica ()
 Antigua and Barbuda (Creole English, English)
 Argentina (Indian Languages, Italian, Spanish)
 Armenia (Armenian, Azerbaijani)
-Aruba (Dutch, English, Papiamento, Spanish)
+idiomesAruba (Dutch, English, Papiamento, Spanish)
 Australia (Arabic, Canton Chinese, English, German, Greek, Italian, Serbo-Croatian, Vietnamese)
 Austria (Czech, German, Hungarian, Polish, Romanian, Serbo-Croatian, Slovene, Turkish)
 Azerbaijan (Armenian, Azerbaijani, Lezgian, Russian)

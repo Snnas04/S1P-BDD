@@ -1,4 +1,4 @@
--- EXECISI
+/home/snnas/Desktop/Classe/BDD/activitats/T9/home/snnas/Desktop/Classe/BDD/activitats/T9/home/snnas/Desktop/Classe/BDD/activitats/T9/home/snnas/Desktop/Classe/BDD/activitats/T9-- EXECISI
 
 -- crear dues tules, parell i imparells, amb un camp tipo int. Fer un procediment amb un parametre in tope int, un out conta_p int (num registres insertats a parells) i un out conta_i (num registres insertats a imparells) int
 

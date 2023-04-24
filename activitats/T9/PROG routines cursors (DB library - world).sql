@@ -14,8 +14,8 @@ inici: begin
 	end if;
 	select BOOK_CODE into bc from COPIES where COPY_CODE = cc;
     
-	delete from BORROWS where COPY_CODE = cc;    
-	delete from COPIES where COPY_CODE = cc;
+	delete from BORROWS where COPY_CODE = cc;
+	delete from COPIES where COPY_CODE = c;
     
     if bc is null then
 		select 'Aquesta copia no existeix';
@@ -84,30 +84,3 @@ end !!
 delimiter ;
 
 call codificar();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

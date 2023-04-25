@@ -6,9 +6,11 @@
     <file url="file://$PROJECT_DIR$/Cursors.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/PROG basic routines user defined variables (DB videoshop).sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/PROG routines cursors (DB library - world).sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/Programming review activities.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/actParametres.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/encriptar.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/exercises PROG III - DB comercio.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/exercises PROG IV - DB comercio.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/triggers_exemples.sql" dialect="MySQL" />
   </component>
 </project>

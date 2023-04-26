@@ -20,14 +20,22 @@ The procedure should return in an output parameter the real price of the flight,
 
 create procedure calculatePrice(basePrice float, customer varchar(10), residentStatus boolean, largeFamily boolean)
     begin
+        declare discount float;
         declare price float;
 
-        case
-            when customer = 'Silver' then price
-            when customer = 'Gold' then price
-            when customer = 'Platinum' then price
-            when customer = 'None' then price
-            end;
+        if customer != 'None' then
+            case
+                when customer = 'Silver' then set discount = discount + 0.5 ;
+                when customer = 'Gold' then set discount = discount + 0.1;
+                when customer = 'Platinum' then set discount = discount + 0.15;
+            end case;
+
+            set price = basePrice * discount;
+        else
+            set price = basePrice;
+        end if $$
+
+        select price;
     end $$
 
 -- 2. Write a procedure that receives three numbers and show them ordered in ascending, in the same line and separated by the symbol <

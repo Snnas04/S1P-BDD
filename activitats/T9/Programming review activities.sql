@@ -1,5 +1,3 @@
-delimiter $$
-
 /* 1. Create a procedure to calculate the real price of a flight.
 The procedure will receive 4 input parameters:
 - a base price, the initial price of the flight without any discounts.
@@ -17,11 +15,13 @@ The procedure will receive 4 input parameters:
 The discounts are all compatible between them. That is, if a customer is a ‘Gold’ member, resident and member of a large family, the discount he should obtain is 95% over the base price.
 The procedure should return in an output parameter the real price of the flight, considering the possible discounts.
 */
+drop procedure if exists calculatePrice;
 
-create procedure calculatePrice(basePrice float, customer varchar(10), residentStatus boolean, largeFamily boolean)
+delimiter $$
+
+create procedure calculatePrice(in basePrice float, in customer varchar(10), in residentStatus boolean, in largeFamily boolean, out price float)
     begin
         declare discount float;
-        declare price float;
 
         if customer != 'None' then
             case
@@ -29,28 +29,108 @@ create procedure calculatePrice(basePrice float, customer varchar(10), residentS
                 when customer = 'Gold' then set discount = discount + 0.1;
                 when customer = 'Platinum' then set discount = discount + 0.15;
             end case;
-
-            set price = basePrice * discount;
-        else
-            set price = basePrice;
         end if $$
 
-        select price;
+        if residentStatus then
+            set discount = discount + 0.75;
+        end if $$
+
+        if largeFamily then
+            set discount = discount + 0.1;
+        end if $$
+
+        set price = basePrice - (basePrice * discount);
     end $$
+
+
+-- diosito procedure
+CREATE PROCEDURE calcDiscount(
+    IN basePrice DECIMAL(6, 2),
+    IN fidelityLevel ENUM ('Silver', 'Gold', 'Platinum', 'None'),
+    IN resident BOOLEAN,
+    IN largeFamily BOOLEAN,
+    OUT finalPrice DECIMAL(6, 2)
+)
+BEGIN
+    DECLARE discount FLOAT;
+
+    CASE fidelityLevel
+        WHEN 'Silver' THEN SET discount = 0.05;
+        WHEN 'Gold' THEN SET discount = 0.1;
+        WHEN 'Platinum' THEN SET discount = 0.15;
+        WHEN 'None' THEN SET discount = 0;
+        END CASE;
+
+    IF resident THEN
+        SET discount = discount + 0.75;
+    END IF;
+
+    IF largeFamily THEN
+        SET discount = discount + 0.1;
+    END IF;
+
+    SELECT discount;
+    SET finalPrice = basePrice - (basePrice * discount);
+END $$
+
+delimiter ;
+
 
 -- 2. Write a procedure that receives three numbers and show them ordered in ascending, in the same line and separated by the symbol <
 
-call ordenant (3,6,8) $$ -- 3 < 6 < 8
-call ordenant (3,8,6) $$ -- 3 < 6 < 8
-call ordenant (6,3,8) $$ -- 3 < 6 < 8
-call ordenant (6,8,3) $$ -- 3 < 6 < 8
-call ordenant (8,3,6) $$ -- 3 < 6 < 8
-call ordenant (8,6,3) $$ -- 3 < 6 < 8
+drop procedure if exists ordenant;
+
+delimiter $$
+
+create procedure ordenant(num1 int, num2 int, num3 int)
+    reads sql data
+begin
+    declare ordenat boolean default true;
+    declare temp int default 0;
+    while ordenat do
+            if num1 < num2 then
+                set temp = num1;
+                set num1 = num2;
+                set num2 = temp;
+            end if;
+
+            if num2 < num3 then
+                set temp = num2;
+                set num2 = num3;
+                set num3 = temp;
+            end if;
+            if num1 > num2 and num2 > num3 then
+                set ordenat = false;
+            end if;
+        end while;
+
+    select concat(num3, ' < ', num2, ' < ', num1);
+end $$
+
+
+delimiter ;
+
+call ordenant (3,6,8); -- 3 < 6 < 8
+call ordenant (3,8,6); -- 3 < 6 < 8
+call ordenant (6,3,8); -- 3 < 6 < 8
+call ordenant (6,8,3); -- 3 < 6 < 8
+call ordenant (8,3,6); -- 3 < 6 < 8
+call ordenant (8,6,3); -- 3 < 6 < 8
 
 -- 3. Write a function that receives a string as parameter and returns it with  blanks between its characters. For example, if it receives 'Welcome', it will return 'W e l c o m e'. 
 
-select ampliar ('Welcome') $$ -- W e l c o m e 
-select ampliar ('Alice') $$ -- A l i c e 
+delimiter $$
+
+create procedure ampliar (in str varchar(50))
+    begin
+
+    end $$
+
+delimiter ;
+
+
+select ampliar ('Welcome'); -- W e l c o m e
+select ampliar ('Alice'); -- A l i c e
 
 /* 4. Write a procedure to find multiples of a number. This procedure will have four parameters: 
 - the number from which we want to get the multiples  
@@ -60,11 +140,11 @@ select ampliar ('Alice') $$ -- A l i c e
 */
 
 
-call muLtiples (2,1,100,@result) $$
-select @result $$ -- The multiples of 2 are:  2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52 54 56 58 60 62 64 66 68 70 72 74 76 78 80 82 84 86 88 90 92 94 96 98 100
+call muLtiples (2,1,100,@result);
+select @result; -- The multiples of 2 are:  2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52 54 56 58 60 62 64 66 68 70 72 74 76 78 80 82 84 86 88 90 92 94 96 98 100
 
-call muLtiples (3,1,100,@result) $$
-select @result $$ -- The multiples of 3 are:  3 6 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84 87 90 93 96 99
+call muLtiples (3,1,100,@result);
+select @result; -- The multiples of 3 are:  3 6 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84 87 90 93 96 99
 
-call muLtiples (4,1,100,@result) $$
-select @result $$ -- The multiples of 4 are:  4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100
+call muLtiples (4,1,100,@result);
+select @result; -- The multiples of 4 are:  4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100

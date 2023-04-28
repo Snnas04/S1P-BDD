@@ -149,6 +149,7 @@ select ampliar ('Alice'); -- A l i c e
 - the last number where we finish the searching
 - an output parameter to save the result 
 */
+-- toni vercio
 set @resultado = 0;
 delimiter $$
 
@@ -163,6 +164,26 @@ begin
             end if;
         END WHILE;
 end $$
+
+-- diosito vercio
+CREATE PROCEDURE muLtiples(IN mult INT, IN init INT, IN end INT, OUT resultString VARCHAR(500))
+BEGIN
+    DECLARE result INT DEFAULT mult;
+
+    SET resultString = CONCAT('The multiples of ', mult, ' are:');
+    main_loop:
+    LOOP
+        SET result = mult * init;
+
+        IF result > end THEN
+            LEAVE main_loop;
+        END IF;
+
+        SET resultString = CONCAT(resultString, ' ', result);
+
+        SET init = init + 1;
+    END LOOP;
+END $$
 
 delimiter ;
 

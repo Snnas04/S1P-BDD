@@ -202,6 +202,27 @@ BEGIN
     SET result = CONCAT('The multiples of are', base, ' ', tempResult);
 END $$
 
+-- juanito
+create procedure multiples(number int, begin int, end int, out llista varchar(5000))
+    reads sql data
+begin
+    declare contador int default 1;
+    set llista = concat('The multiples of ', number , 'are: ');
+    bucle : loop
+        if number * contador = end then
+            set llista = concat(llista, number * contador);
+            leave bucle;
+        elseif number * contador > end then
+            leave bucle;
+        elseif number * contador >= begin then
+            set llista = concat(llista, number * contador, ', ');
+        end if;
+        set contador = contador + 1;
+    end loop;
+    select llista;
+end $$
+
+
 delimiter ;
 
 

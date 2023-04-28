@@ -150,9 +150,10 @@ select ampliar ('Alice'); -- A l i c e
 - an output parameter to save the result 
 */
 -- toni vercio
-set @resultado = 0;
 delimiter $$
+set @resultado = 0 $$
 
+DROP PROCEDURE if exists muLtiples;
 create procedure multiples (in tablaNumero int, in numeroEmpezar int, in numeroAcabar int, out resultado int)
 begin
     declare i int default 1;
@@ -166,6 +167,7 @@ begin
 end $$
 
 -- diosito vercio
+DROP PROCEDURE if exists muLtiples;
 CREATE PROCEDURE muLtiples(IN mult INT, IN init INT, IN end INT, OUT resultString VARCHAR(500))
 BEGIN
     DECLARE result INT DEFAULT mult;
@@ -183,6 +185,21 @@ BEGIN
 
         SET init = init + 1;
     END LOOP;
+END $$
+
+-- puthon
+DROP PROCEDURE if exists muLtiples;
+CREATE PROCEDURE muLtiples(base INT, start INT, final INT, OUT result VARCHAR(9999))
+BEGIN
+    DECLARE tempResult VARCHAR(9999) DEFAULT '';
+    DECLARE counter INT DEFAULT start;
+
+    WHILE counter < final DO
+            SET tempResult = CONCAT(tempResult, ' ', counter);
+            SET counter = counter + base;
+        END WHILE;
+
+    SET result = CONCAT('The multiples of are', base, ' ', tempResult);
 END $$
 
 delimiter ;

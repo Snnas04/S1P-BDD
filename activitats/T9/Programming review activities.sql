@@ -117,14 +117,25 @@ call ordenant (6,8,3); -- 3 < 6 < 8
 call ordenant (8,3,6); -- 3 < 6 < 8
 call ordenant (8,6,3); -- 3 < 6 < 8
 
--- 3. Write a function that receives a string as parameter and returns it with  blanks between its characters. For example, if it receives 'Welcome', it will return 'W e l c o m e'. 
-
+-- 3. Write a function that receives a string as parameter and returns it with  blanks between its characters. For example, if it receives 'Welcome', it will return 'W e l c o m e'.
 delimiter $$
 
-create procedure ampliar (in str varchar(50))
-    begin
+DROP FUNCTION ampliar;
+CREATE FUNCTION ampliar(word VARCHAR(127)) RETURNS VARCHAR(255)
+    NO SQL
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE result VARCHAR(255) DEFAULT '';
+    lop : LOOP
+        IF i > CHAR_LENGTH(word) THEN
+            LEAVE lop;
+        END IF;
 
-    end $$
+        SET result = CONCAT( result, ' ', SUBSTR(word FROM i FOR 1));
+        SET i = i +1;
+    END LOOP;
+    RETURN  result;
+END $$
 
 delimiter ;
 
@@ -138,6 +149,22 @@ select ampliar ('Alice'); -- A l i c e
 - the last number where we finish the searching
 - an output parameter to save the result 
 */
+set @resultado = 0;
+delimiter $$
+
+create procedure multiples (in tablaNumero int, in numeroEmpezar int, in numeroAcabar int, out resultado int)
+begin
+    declare i int default 1;
+    WHILE numeroEmpezar <= numeroAcabar DO
+            set numeroEmpezar = tablaNumero * i;
+            if numeroEmpezar <= numeroAcabar then
+                set resultado = numeroEmpezar;
+                set i = i + 1;
+            end if;
+        END WHILE;
+end $$
+
+delimiter ;
 
 
 call muLtiples (2,1,100,@result);

@@ -5,6 +5,7 @@ begin
     insert into AUTORS (ID_AUT, NOM_AUT, DNAIX_AUT) values (code, name, birthdate);
 end $$
 
+
 -- 2
 create procedure AltaAutor2(name varchar(100), birthdate date)
 BEGIN
@@ -14,6 +15,7 @@ BEGIN
     insert into autors (id_aut,nom_aut,dnaix_aut) values
         (code,name,birthdate);
 end $$
+
 
 -- 3
 CREATE PROCEDURE AltaAutor3(IN name VARCHAR(50), IN birthdate DATE, IN nationality VARCHAR(50))
@@ -28,6 +30,7 @@ BEGIN
 
     INSERT INTO autors VALUES (temp+1, name, birthdate, nationality, NULL);
 end;
+
 
 -- 4
 select ID_LLIB AS 'CODE', TITOL as 'TITLE',
@@ -54,6 +57,7 @@ delimiter ;
 
 set @autors = AutorsLlibre(123);
 select @autors;
+
 
 -- 5
 CREATE TABLE llibresLog (
@@ -113,3 +117,30 @@ delete from LLIBRES
 where ID_LLIB = 9000;
 select  * from LLIBRES order by ID_LLIB desc;
 select * from llibresLog;
+
+
+-- 6
+
+
+-- 7
+select * from LLIBRES
+where ID_LLIB not in (select distinct FK_IDLLIB from EXEMPLARS);
+
+select count(*) from EXEMPLARS; -- 10107
+select count(*) from LLI_AUT; -- 8727
+select count(*) from LLI_TEMA; -- 14957
+select count(*) from RESERVES; -- 0
+
+create event netejaExemplars
+    on schedule every 2 minute
+    do
+    begin
+        start transaction;
+        delete from LLI_AUT where FK_IDLLIB not in (select distinct FK_IDLLIB from EXEMPLARS);
+        delete from LLI_TEMA where FK_IDLLIB not in (select distinct FK_IDLLIB from EXEMPLARS);
+        delete from RESERVES where FK_IDLLIB not in (select distinct FK_IDLLIB from EXEMPLARS);
+        delete from LLIBRES where ID_LLIB not in (select distinct FK_IDLLIB from EXEMPLARS);
+        commit;
+    end;
+
+show events;

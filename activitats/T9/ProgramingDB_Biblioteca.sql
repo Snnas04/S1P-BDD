@@ -50,8 +50,66 @@ begin
             where FK_IDLLIB = code);
 end $$
 
+delimiter ;
+
 set @autors = AutorsLlibre(123);
 select @autors;
 
 -- 5
+CREATE TABLE llibresLog (
+    book_code INT,
+    operation ENUM('Insert', 'Delete', 'Update'),
+    new_title VARCHAR(200),
+    old_title VARCHAR(200),
+    new_isbn VARCHAR(25),
+    old_isbn VARCHAR(25),
+    user VARCHAR(200),
+    daatetime DATETIME,
 
+    PRIMARY KEY (book_code, daatetime)
+);
+
+delimiter $$
+
+CREATE TRIGGER llibreInsert
+    AFTER INSERT ON LLIBRES
+    FOR EACH ROW
+BEGIN
+    INSERT INTO llibresLog (book_code, operation, new_title, new_isbn, user, daatetime) VALUES
+        (NEW.ID_LLIB, 'Insert', NEW.TITOL, NEW.ISBN, CURRENT_USER(), NOW());
+END $$
+
+CREATE TRIGGER llibreDelete
+    before DELETE ON LLIBRES
+    FOR EACH ROW
+BEGIN
+    INSERT INTO llibresLog VALUES
+        (OLD.ID_LLIB, 'Delete', null, old.TITOL, null, old.ISBN, CURRENT_USER(), NOW());
+END $$
+
+CREATE TRIGGER llibreUpdate
+    AFTER UPDATE ON LLIBRES
+    FOR EACH ROW
+BEGIN
+    INSERT INTO llibresLog VALUES
+        (NEW.ID_LLIB, 'Update', NEW.TITOL, OLD.TITOL, NEW.ISBN, OLD.ISBN, CURRENT_USER(), NOW());
+END $$
+
+delimiter ;
+
+-- comprovar trigger per fer insert
+insert into LLIBRES (ID_LLIB, TITOL, ISBN, IMG_LLIB) VALUES (9000, 'ALICE IN WONDERLAND', 'AAAABBBBR4445', NULL);
+SELECT * FROM LLIBRES order by ID_LLIB desc;
+select * from llibresLog;
+
+-- comprovar trigger per fer update
+update LLIBRES
+set TITOL = 'ALICE II' where ID_LLIB = 9000;
+select  * from LLIBRES order by ID_LLIB desc;
+select * from llibresLog;
+
+-- comprovar trigger per fer delete
+delete from LLIBRES
+where ID_LLIB = 9000;
+select  * from LLIBRES order by ID_LLIB desc;
+select * from llibresLog;

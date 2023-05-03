@@ -127,8 +127,8 @@ select * from LLIBRES
 where ID_LLIB not in (select distinct FK_IDLLIB from EXEMPLARS);
 
 select count(*) from EXEMPLARS; -- 10107
-select count(*) from LLI_AUT; -- 8727
-select count(*) from LLI_TEMA; -- 14957
+select count(*) from LLI_AUT; -- 8610
+select count(*) from LLI_TEMA; -- 14914
 select count(*) from RESERVES; -- 0
 
 create event netejaExemplars
@@ -142,5 +142,7 @@ create event netejaExemplars
         delete from LLIBRES where ID_LLIB not in (select distinct FK_IDLLIB from EXEMPLARS);
         commit;
     end;
+
+select * from performance_schema.error_log; -- per veure si al meu event hi ha un error
 
 show events;

@@ -14,13 +14,15 @@ do
 begin
     declare dorsalGoat int;
     declare metersGoat int;
+    declare meta int;
+    set meta = 30;
 
-    select dorsal into dorsalGoat from goat order by rand() limit 1;
+    select dorsal into dorsalGoat from goat where metersSoFar < meta order by rand() limit 1;
     select floor(rand() * 8) -2 into metersGoat;
 
     insert into race (dorsal, meters) values (dorsalGoat, metersGoat);
 
-    if (select count(*) from goat where metersSoFar >= 30) = 3 then
+    if (select count(*) from goat where metersSoFar >= meta) = 3 then
         alter event GoatsRace disable ;
     end if;
 end;

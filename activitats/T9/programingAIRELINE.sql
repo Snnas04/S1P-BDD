@@ -136,6 +136,6 @@ create trigger updateFlights after update on FLIGHTS
         update AIRPORTS set nr_flights = nr_flights + 1 where id_airport = NEW.departure_airport;
     end if;
 
-create trigger deleteFlights before delete on FLIGHTS
+create trigger deleteFlights after delete on FLIGHTS
     for each row
     update AIRPORTS set nr_flights = nr_flights - 1 where id_airport = OLD.departure_airport;

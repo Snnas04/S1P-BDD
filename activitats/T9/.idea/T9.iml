@@ -5,6 +5,7 @@
     <content url="file://$MODULE_DIR$/../T6" />
     <content url="file://$MODULE_DIR$/../T7" />
     <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$/../../examen/T9" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

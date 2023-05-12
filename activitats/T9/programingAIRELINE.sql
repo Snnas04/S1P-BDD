@@ -4,7 +4,7 @@ select date(departure_time) AS 'DATE',
        a.location AS 'FROM',
        ai.location AS 'TO',
        date_format(departure_time, '%H:%i') as 'DEPARTURE TIME',
-       date_format(arrival_time, '%H:%i') AS 'ARRIVAL TIME',
+           date_format(arrival_time, '%H:%i') AS 'ARRIVAL TIME',
        DATE_FORMAT(SEC_TO_TIME(TIMESTAMPDIFF(SECOND, departure_time, arrival_time)), '%H:%i') as DURATION,
        c.alias as PILOT,
        cr.alias as COPILOT

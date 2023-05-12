@@ -19,7 +19,7 @@ begin
 	declare myLanguages cursor for
 		select Language from countrylanguage where CountryCode =pais;
     declare continue handler for not found set final = true;
-    
+
 
     open myLanguages;
     bucle: loop

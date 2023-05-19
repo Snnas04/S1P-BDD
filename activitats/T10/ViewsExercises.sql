@@ -38,6 +38,3 @@ grant select (NomClient, CodiPostal, Telefon) on Top5Madrid to X;
 -- 5
 revoke select (NomClient, NomContacte, NumeroDeComandes) on CompteComandesMadrid from X;
 revoke select on Clients from X;
-
-select *
-from Top5Madrid;

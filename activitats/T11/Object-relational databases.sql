@@ -1,37 +1,37 @@
 -- Exercise 1: Create object types
 CREATE TYPE Member AS OBJECT (
-    idMember CHAR(4),
-    fullname VARCHAR2(100),
-    username VARCHAR2(15),
-    phone VARCHAR2(15),
-    email VARCHAR2(100),
-    dateEntry DATE
-);
-
+                                 idMember CHAR(4),
+                                 fullname VARCHAR2(100),
+                                 username VARCHAR2(15),
+                                 phone VARCHAR2(15),
+                                 email VARCHAR2(100),
+                                 dateEntry DATE
+                             )NOT FINAL;
+/
 CREATE TYPE Teacher UNDER Member (
-    title VARCHAR2(100),
-    salary NUMBER(8, 2),
-    category VARCHAR2(20)
-);
-
+                                     title VARCHAR2(100),
+                                     salary NUMBER(8, 2),
+                                     category VARCHAR2(20)
+                                 );
+/
 CREATE TYPE Groups AS OBJECT (
-    groupId INTEGER,
-    code CHAR(3),
-    name VARCHAR2(50),
-    tutor REF Teacher,
-    level INTEGER,
-    morning CHAR(1),
-    requirements VARCHAR2(100)
-);
-
+                                 groupId INTEGER,
+                                 code CHAR(3),
+                                 name VARCHAR2(50),
+                                 tutor REF Teacher,
+                                 level INTEGER,
+                                 morning CHAR(1),
+                                 requirements VARCHAR2(100)
+                             );
+/
 CREATE TYPE Student UNDER Member (
-    enrolid INTEGER,
-    birthdate DATE,
-    groupId REF Groups,
-    gender CHAR(1),
-    nationality VARCHAR2(15)
-);
-
+                                     enrolid INTEGER,
+                                     birthdate DATE,
+                                     groupId REF Groups,
+                                     gender CHAR(1),
+                                     nationality VARCHAR2(15)
+                                 );
+/
 -- Exercise 2: Create constructor method for Teacher
 CREATE OR REPLACE TYPE BODY Teacher AS
     CONSTRUCTOR FUNCTION Teacher(
@@ -56,7 +56,7 @@ CREATE OR REPLACE TYPE BODY Teacher AS
         RETURN;
     END;
 END;
-
+/
 -- Exercise 3: Create getTeacher method
 CREATE OR REPLACE TYPE BODY Teacher AS
     MEMBER FUNCTION getTeacher RETURN VARCHAR2 IS
@@ -64,7 +64,7 @@ CREATE OR REPLACE TYPE BODY Teacher AS
         RETURN fullname || ' (' || title || ') / ' || category;
     END;
 END;
-
+/
 -- Exercise 4: Create TeacherList varray
 CREATE TYPE TeacherList AS VARRAY(15) OF Teacher;
 
@@ -76,69 +76,69 @@ DECLARE
 BEGIN
     NULL;
 END;
-
+/
 -- Exercise 5: Create Groups_tab table and insert rows
 CREATE TABLE Groups_tab OF Groups;
-
+/
 INSERT INTO Groups_tab VALUES (
-    Groups(
-          10,
-          'S1W',
-          'Desenvolupament d''Aplicacions Web',
-          (SELECT REF(t) FROM TABLE(TeacherList_1) t WHERE t.idMember = 'T002'),
-          1,
-          'Y',
-          'Middle school, high school, university'
-    )
-);
-
+                                  Groups(
+                                          10,
+                                          'S1W',
+                                          'Desenvolupament d''Aplicacions Web',
+                                          (SELECT REF(t) FROM TABLE(TeacherList_1) t WHERE t.idMember = 'T002'),
+                                          1,
+                                          'Y',
+                                          'Middle school, high school, university'
+                                      )
+                              );
+/
 INSERT INTO Groups_tab VALUES (
-    Groups(
-        20,
-        'S2P',
-        'Desenvolupament d''Aplicacions Multiplataforma',
-        (SELECT REF(t) FROM TABLE(TeacherList_1) t WHERE t.idMember = 'T001'),
-        2,
-        'N',
-        'S1P'
-    )
-);
-
+                                  Groups(
+                                          20,
+                                          'S2P',
+                                          'Desenvolupament d''Aplicacions Multiplataforma',
+                                          (SELECT REF(t) FROM TABLE(TeacherList_1) t WHERE t.idMember = 'T001'),
+                                          2,
+                                          'N',
+                                          'S1P'
+                                      )
+                              );
+/
 -- Exercise 6: Create Students table and insert rows
 CREATE TABLE Students OF Student;
-
+/
 INSERT INTO Students VALUES (
-    Student(
-        'S001',
-        'Alice in Wonderland',
-        'ally',
-        '665663311',
-        'alice.wonder@pau.cat',
-        TO_DATE('14/04/2023', 'DD/MM/YYYY'),
-        1,
-        TO_DATE('01/01/1990', 'DD/MM/YYYY'),
-        (SELECT REF(g) FROM Groups_tab g WHERE g.groupId = 10),
-        'F',
-        'Wonderland'
-    )
-);
-
+                                Student(
+                                        'S001',
+                                        'Alice in Wonderland',
+                                        'ally',
+                                        '665663311',
+                                        'alice.wonder@pau.cat',
+                                        TO_DATE('14/04/2023', 'DD/MM/YYYY'),
+                                        1,
+                                        TO_DATE('01/01/1990', 'DD/MM/YYYY'),
+                                        (SELECT REF(g) FROM Groups_tab g WHERE g.groupId = 10),
+                                        'F',
+                                        'Wonderland'
+                                    )
+                            );
+/
 INSERT INTO Students VALUES (
-    Student(
-        'S002',
-        'George Jobs',
-        'geor',
-        '665662222',
-        'george.jobs@pau.cat',
-        TO_DATE('14/04/2023', 'DD/MM/YYYY'),
-        2,
-        TO_DATE('23/04/1989', 'DD/MM/YYYY'),
-        (SELECT REF(g) FROM Groups_tab g WHERE g.groupId = 20),
-        'M',
-        'English'
-    )
-);
-
+                                Student(
+                                        'S002',
+                                        'George Jobs',
+                                        'geor',
+                                        '665662222',
+                                        'george.jobs@pau.cat',
+                                        TO_DATE('14/04/2023', 'DD/MM/YYYY'),
+                                        2,
+                                        TO_DATE('23/04/1989', 'DD/MM/YYYY'),
+                                        (SELECT REF(g) FROM Groups_tab g WHERE g.groupId = 20),
+                                        'M',
+                                        'English'
+                                    )
+                            );
+/
 -- Exercise 7: Modify and insert group from Groups_tab table
 DECLARE
     oneGroup Groups;
@@ -149,3 +149,4 @@ BEGIN
     oneGroup.tutor := (SELECT REF(t) FROM TABLE(TeacherList_1) t WHERE t.idMember = 'T002');
     INSERT INTO Groups_tab SELECT oneGroup FROM DUAL;
 END;
+/

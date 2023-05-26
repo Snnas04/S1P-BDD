@@ -19,7 +19,7 @@ CREATE TYPE Groups AS OBJECT (
                                  code CHAR(3),
                                  name VARCHAR2(50),
                                  tutor REF Teacher,
-                                 level INTEGER,
+                                 "level" INTEGER,
                                  morning CHAR(1),
                                  requirements VARCHAR2(100)
                              );
@@ -67,11 +67,11 @@ END;
 /
 -- Exercise 4: Create TeacherList varray
 CREATE TYPE TeacherList AS VARRAY(15) OF Teacher;
-
+/
 DECLARE
     TeacherList_1 TeacherList := TeacherList(
-            Teacher('T001', 'Juliette Smith', 'juli', '666123456', 'juliette.smith@pau.cat', 'Bachelor in Computer Science', 60000),
-            Teacher('T002', 'Nicole Brown', 'nico', '666111222', 'nicole.brown@pau.cat', 'Data Science Master', 50000)
+            Teacher('T001', 'Juliette Smith', 'juli', '666123456', 'juliette.smith@pau.cat', 'Bachelor in Computer Science', null),
+            Teacher('T002', 'Nicole Brown', 'nico', '666111222', 'nicole.brown@pau.cat', 'Data Science Master', null)
         );
 BEGIN
     NULL;

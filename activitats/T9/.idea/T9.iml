@@ -3,6 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$/../../DB" />
     <content url="file://$MODULE_DIR$/../T10" />
+    <content url="file://$MODULE_DIR$/../T11" />
     <content url="file://$MODULE_DIR$/../T6" />
     <content url="file://$MODULE_DIR$/../T7" />
     <content url="file://$MODULE_DIR$" />

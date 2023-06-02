@@ -415,6 +415,7 @@ SELECT * FROM oferta_teatral;
 
 -- ROL
 DELIMITER //
+
 DROP FUNCTION IF EXISTS Funcio_Rol //
 
 CREATE FUNCTION Funcio_Rol(actor_name VARCHAR(40), play_title VARCHAR(100))
@@ -444,6 +445,7 @@ SELECT Funcio_Rol('John Smith', 'Hamlet');
 
 -- MILLOR
 DELIMITER //
+
 DROP FUNCTION IF EXISTS Funcio_Millor //
 
 CREATE FUNCTION Funcio_Millor()
@@ -476,6 +478,8 @@ SELECT Funcio_Millor();
 -- GENERES
 DELIMITER //
 
+DROP PROCEDURE IF EXISTS GENERES //
+
 CREATE PROCEDURE GENERES()
 BEGIN
     SELECT Generes.genere, COUNT(Obra.idGenere) AS obra_count
@@ -490,4 +494,42 @@ DELIMITER ;
 CALL GENERES();
 
 -- PARTICIPANTS
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS PARTICIPANTS //
+
+CREATE PROCEDURE PARTICIPANTS(IN play_title VARCHAR(100), IN participant_type CHAR(1))
+BEGIN
+    IF participant_type = 'a' THEN
+        SELECT Persona.nom, TIMESTAMPDIFF(YEAR, Persona.data_neixament, CURDATE()) AS age, Obra_Actor.paper, Funcio_Rol(Persona.nom, Obra.titol) AS role
+        FROM Persona
+                 JOIN Actors ON Persona.DNI = Actors.DNI
+                 JOIN Obra_Actor ON Actors.DNI = Obra_Actor.actor_dni
+                 JOIN Obra ON Obra_Actor.titol = Obra.titol
+        WHERE Obra.titol = play_title
+        ORDER BY CASE
+                     WHEN Funcio_Rol(Persona.nom, Obra.titol) = 'PRINCIPAL' THEN 1
+                     WHEN Funcio_Rol(Persona.nom, Obra.titol) = 'SECUNDARI' THEN 2
+                     WHEN Funcio_Rol(Persona.nom, Obra.titol) = 'EXTRA' THEN 3
+                     ELSE 4
+                     END, Persona.nom;
+
+    ELSEIF participant_type = 't' THEN
+        SELECT Persona.nom, TIMESTAMPDIFF(YEAR, Persona.data_neixament, CURDATE()) AS age, Obra_PersonalTecnic.tasca
+        FROM Persona
+                 JOIN PersonalTecnic ON Persona.DNI = PersonalTecnic.DNI
+                 JOIN Obra_PersonalTecnic ON PersonalTecnic.DNI = Obra_PersonalTecnic.personal_DNI
+                 JOIN Obra ON Obra_PersonalTecnic.titol = Obra.titol
+        WHERE Obra.titol = play_title
+        ORDER BY Persona.nom;
+
+    END IF;
+END //
+
+DELIMITER ;
+
+CALL PARTICIPANTS('Hamlet', 'a');
+CALL PARTICIPANTS('Don Quijote de la Mancha', 'a');
+CALL PARTICIPANTS('El avaro', 't');
+CALL PARTICIPANTS('Bodas de sangre', 't');
 

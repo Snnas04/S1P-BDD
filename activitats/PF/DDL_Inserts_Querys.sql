@@ -387,6 +387,3 @@ SELECT silla, Obra.titol, Funcio.datetime, Teatre.nom FROM Ticket
 JOIN Funcio ON Ticket.datetime = Funcio.datetime AND Ticket.Teatre_ID = Funcio.Teatre_ID AND Ticket.Obra_Titol = Funcio.Obra_Titol
 JOIN Teatre ON Funcio.Teatre_ID = Teatre.ID
 JOIN Obra ON Ticket.Obra_Titol = Obra.titol;
-
-
-

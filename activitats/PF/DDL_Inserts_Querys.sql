@@ -409,6 +409,8 @@ CREATE VIEW oferta_teatral AS
     ORDER BY titol ASC;
 
 SELECT * FROM oferta_teatral;
+
+
 /*********************
 *     Function       *
 **********************/

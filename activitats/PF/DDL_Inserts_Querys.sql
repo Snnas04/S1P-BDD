@@ -387,3 +387,107 @@ SELECT silla, Obra.titol, Funcio.datetime, Teatre.nom FROM Ticket
 JOIN Funcio ON Ticket.datetime = Funcio.datetime AND Ticket.Teatre_ID = Funcio.Teatre_ID AND Ticket.Obra_Titol = Funcio.Obra_Titol
 JOIN Teatre ON Funcio.Teatre_ID = Teatre.ID
 JOIN Obra ON Ticket.Obra_Titol = Obra.titol;
+
+
+/*********************
+*       Views        *
+**********************/
+DROP VIEW IF EXISTS oferta_teatral;
+CREATE VIEW oferta_teatral AS
+    SELECT titol AS TITOL,
+           P.nom AS DIRECOTR,
+           G.genere AS GENERE,
+           tipo AS TIPO,
+           T.ciutat AS CIUTATS,
+           cost AS COST
+    FROM Obra
+    join Generes G on G.ID = Obra.idGenere
+    join Director D on D.DNI = Obra.idDirector
+    join Persona P on P.DNI = D.DNI
+    join Funcio F on Obra.titol = F.Obra_Titol
+    join Teatre T on T.ID = F.Teatre_ID
+    ORDER BY titol ASC;
+
+SELECT * FROM oferta_teatral;
+/*********************
+*     Function       *
+**********************/
+
+-- ROL
+DELIMITER //
+DROP FUNCTION IF EXISTS Funcio_Rol //
+
+CREATE FUNCTION Funcio_Rol(actor_name VARCHAR(40), play_title VARCHAR(100))
+    RETURNS VARCHAR(50)
+    READS SQL DATA
+BEGIN
+    DECLARE role VARCHAR(50);
+
+    SELECT rol INTO role
+    FROM Obra_Actor
+             JOIN Actors ON Obra_Actor.actor_dni = Actors.DNI
+             JOIN Persona ON Actors.DNI = Persona.DNI
+    WHERE Persona.nom = actor_name
+      AND Obra_Actor.titol = play_title;
+
+    IF role IS NULL THEN
+        SET role = '***';
+    END IF;
+
+    RETURN role;
+END //
+
+DELIMITER ;
+
+SELECT Funcio_Rol('Elena Torres', 'Don Quijote de la Mancha');
+SELECT Funcio_Rol('John Smith', 'Hamlet');
+
+-- MILLOR
+DELIMITER //
+DROP FUNCTION IF EXISTS Funcio_Millor //
+
+CREATE FUNCTION Funcio_Millor()
+    RETURNS VARCHAR(100)
+    READS SQL DATA
+BEGIN
+    DECLARE best_play VARCHAR(100);
+
+    SELECT Obra_Titol INTO best_play
+    FROM (
+             SELECT Obra_Titol, SUM(preu) AS total
+             FROM Ticket
+             GROUP BY Obra_Titol
+             ORDER BY total DESC
+             LIMIT 1
+         ) AS TOTAL_PRICE_TABLE;
+
+    RETURN best_play;
+END //
+
+DELIMITER ;
+
+SELECT Funcio_Millor();
+
+
+/*********************
+*     Procedure      *
+**********************/
+
+-- GENERES
+DELIMITER //
+
+CREATE PROCEDURE GENERES()
+BEGIN
+    SELECT Generes.genere, COUNT(Obra.idGenere) AS obra_count
+    FROM Generes
+             LEFT JOIN Obra ON Generes.ID = Obra.idGenere
+    GROUP BY Generes.genere
+    ORDER BY obra_count DESC;
+END //
+
+DELIMITER ;
+
+CALL GENERES();
+
+-- PARTICIPANTS
+

@@ -393,20 +393,23 @@ JOIN Obra ON Ticket.Obra_Titol = Obra.titol;
 *       Views        *
 **********************/
 DROP VIEW IF EXISTS oferta_teatral;
+
 CREATE VIEW oferta_teatral AS
-    SELECT titol AS TITOL,
-           P.nom AS DIRECOTR,
-           G.genere AS GENERE,
-           tipo AS TIPO,
-           T.ciutat AS CIUTATS,
-           cost AS COST
-    FROM Obra
-    join Generes G on G.ID = Obra.idGenere
-    join Director D on D.DNI = Obra.idDirector
-    join Persona P on P.DNI = D.DNI
-    join Funcio F on Obra.titol = F.Obra_Titol
-    join Teatre T on T.ID = F.Teatre_ID
-    ORDER BY titol ASC;
+    SELECT O.titol AS 'Títol',
+           P.nom AS 'Director',
+           G.genere AS 'Gènere',
+           O.tipo AS 'Tipus',
+           GROUP_CONCAT(T.ciutat SEPARATOR ', ') AS 'Ciutats',
+           O.cost AS 'Cost'
+    FROM Obra AS O
+             JOIN Director AS D ON O.idDirector = D.DNI
+             JOIN Persona AS P ON D.DNI = P.DNI
+             JOIN Generes AS G ON O.idGenere = G.ID
+             JOIN Funcio AS F ON O.titol = F.Obra_Titol
+             JOIN Teatre AS T ON F.Teatre_ID = T.ID
+    WHERE YEAR(F.datetime) = YEAR(CURDATE())
+    GROUP BY O.titol
+    ORDER BY O.titol ASC;
 
 SELECT * FROM oferta_teatral;
 
@@ -427,11 +430,11 @@ BEGIN
     DECLARE role VARCHAR(50);
 
     SELECT rol INTO role
-    FROM Obra_Actor
-             JOIN Actors ON Obra_Actor.actor_dni = Actors.DNI
-             JOIN Persona ON Actors.DNI = Persona.DNI
-    WHERE Persona.nom = actor_name
-      AND Obra_Actor.titol = play_title;
+    FROM Obra_Actor AS OA
+             JOIN Actors AS A ON OA.actor_dni = A.DNI
+             JOIN Persona AS P ON A.DNI = P.DNI
+    WHERE P.nom = actor_name
+      AND OA.titol = play_title;
 
     IF role IS NULL THEN
         SET role = '***';
@@ -484,10 +487,10 @@ DROP PROCEDURE IF EXISTS GENERES //
 
 CREATE PROCEDURE GENERES()
 BEGIN
-    SELECT Generes.genere, COUNT(Obra.idGenere) AS obra_count
-    FROM Generes
-             LEFT JOIN Obra ON Generes.ID = Obra.idGenere
-    GROUP BY Generes.genere
+    SELECT G.genere, COUNT(O.idGenere) AS obra_count
+    FROM Generes AS G
+             LEFT JOIN Obra AS O ON G.ID = O.idGenere
+    GROUP BY G.genere
     ORDER BY obra_count DESC;
 END //
 
@@ -503,27 +506,27 @@ DROP PROCEDURE IF EXISTS PARTICIPANTS //
 CREATE PROCEDURE PARTICIPANTS(IN play_title VARCHAR(100), IN participant_type CHAR(1))
 BEGIN
     IF participant_type = 'a' THEN
-        SELECT Persona.nom, TIMESTAMPDIFF(YEAR, Persona.data_neixament, CURDATE()) AS age, Obra_Actor.paper, Funcio_Rol(Persona.nom, Obra.titol) AS role
-        FROM Persona
-                 JOIN Actors ON Persona.DNI = Actors.DNI
-                 JOIN Obra_Actor ON Actors.DNI = Obra_Actor.actor_dni
-                 JOIN Obra ON Obra_Actor.titol = Obra.titol
-        WHERE Obra.titol = play_title
+        SELECT P.nom, TIMESTAMPDIFF(YEAR, P.data_neixament, CURDATE()) AS age, OA.paper, Funcio_Rol(P.nom, O.titol) AS role
+        FROM Persona AS P
+                 JOIN Actors AS A ON P.DNI = A.DNI
+                 JOIN Obra_Actor AS OA ON A.DNI = OA.actor_dni
+                 JOIN Obra AS O ON OA.titol = O.titol
+        WHERE O.titol = play_title
         ORDER BY CASE
-                     WHEN Funcio_Rol(Persona.nom, Obra.titol) = 'PRINCIPAL' THEN 1
-                     WHEN Funcio_Rol(Persona.nom, Obra.titol) = 'SECUNDARI' THEN 2
-                     WHEN Funcio_Rol(Persona.nom, Obra.titol) = 'EXTRA' THEN 3
+                     WHEN Funcio_Rol(P.nom, O.titol) = 'PRINCIPAL' THEN 1
+                     WHEN Funcio_Rol(P.nom, O.titol) = 'SECUNDARI' THEN 2
+                     WHEN Funcio_Rol(P.nom, O.titol) = 'EXTRA' THEN 3
                      ELSE 4
-                     END, Persona.nom;
+                     END, P.nom;
 
     ELSEIF participant_type = 't' THEN
-        SELECT Persona.nom, TIMESTAMPDIFF(YEAR, Persona.data_neixament, CURDATE()) AS age, Obra_PersonalTecnic.tasca
-        FROM Persona
-                 JOIN PersonalTecnic ON Persona.DNI = PersonalTecnic.DNI
-                 JOIN Obra_PersonalTecnic ON PersonalTecnic.DNI = Obra_PersonalTecnic.personal_DNI
-                 JOIN Obra ON Obra_PersonalTecnic.titol = Obra.titol
-        WHERE Obra.titol = play_title
-        ORDER BY Persona.nom;
+        SELECT P2.nom, TIMESTAMPDIFF(YEAR, P2.data_neixament, CURDATE()) AS age, OPT.tasca
+        FROM Persona AS P2
+                 JOIN PersonalTecnic AS PT ON P2.DNI = PT.DNI
+                 JOIN Obra_PersonalTecnic AS OPT ON PT.DNI = OPT.personal_DNI
+                 JOIN Obra AS O2 ON OPT.titol = O2.titol
+        WHERE O2.titol = play_title
+        ORDER BY P2.nom;
 
     END IF;
 END //
@@ -534,4 +537,3 @@ CALL PARTICIPANTS('Hamlet', 'a');
 CALL PARTICIPANTS('Don Quijote de la Mancha', 'a');
 CALL PARTICIPANTS('El avaro', 't');
 CALL PARTICIPANTS('Bodas de sangre', 't');
-

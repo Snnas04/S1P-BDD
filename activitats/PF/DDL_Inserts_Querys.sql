@@ -457,21 +457,29 @@ CREATE FUNCTION Funcio_Millor()
     RETURNS VARCHAR(100)
     READS SQL DATA
 BEGIN
-    DECLARE best_play VARCHAR(100);
+    DECLARE best_play_list VARCHAR(100);
+    DECLARE max_total DECIMAL(10,2);
 
-    SELECT Obra_Titol INTO best_play
+    SELECT MAX(total) INTO max_total
+    FROM (
+             SELECT SUM(preu) AS total
+             FROM Ticket
+             GROUP BY Obra_Titol
+         ) AS total_price_table;
+
+    SELECT GROUP_CONCAT(Obra_Titol) INTO best_play_list
     FROM (
              SELECT Obra_Titol, SUM(preu) AS total
              FROM Ticket
              GROUP BY Obra_Titol
-             ORDER BY total DESC
-             LIMIT 1
-         ) AS TOTAL_PRICE_TABLE;
+             HAVING total = max_total
+         ) AS max_price_table;
 
-    RETURN best_play;
+    RETURN best_play_list;
 END //
 
 DELIMITER ;
+
 
 SELECT Funcio_Millor();
 
